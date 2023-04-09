@@ -2,15 +2,17 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:gravity="center">
 
     <TextView
+        android:id="@+id/tv_camera_big"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="登录成功"
-        android:textSize="40sp"
-        android:textColor="@color/white"
-        android:background="@color/theme"/>
+        android:drawableTop="@mipmap/camera_big"
+        android:drawableTint="@color/theme"
+        android:layout_gravity="center"
+        android:text="点击拍摄火眼视频"
+        android:textColor="@color/theme"
+        android:textSize="17dp"/>
 
 </LinearLayout>

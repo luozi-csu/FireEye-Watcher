@@ -20,6 +20,9 @@ import com.luozi.fireeyewatcher.http.HttpResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
 
     private HttpClient client;
@@ -51,13 +54,17 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         JSONObject data = new JSONObject();
         try {
-            data.put("user_name", username);
+            data.put("name", username);
             data.put("password", password);
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
 
-        HttpRequest request = new HttpRequest("POST", "http://10.0.2.2:8080/login", null, null, data);
+        Map<String, String[]> header = new HashMap<>();
+        header.put("Content-Type", new String[]{"application/json"});
+        header.put("Accept", new String[]{"application/json"});
+
+        HttpRequest request = new HttpRequest("POST", "http://10.0.2.2:8080/api/v1/auth/login", null, header, data);
         HttpRequestTask task = new HttpRequestTask(client, request);
         HttpResponse response = task.execute();
 
@@ -71,8 +78,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             Log.e(LOGIN_TAG, String.format("请求错误: [%s] %s", request.method, request.url));
             Toast.makeText(this, "账号或密码错误", Toast.LENGTH_SHORT).show();
         } else {
+            Log.d(LOGIN_TAG, response.toString());
             Intent intent = new Intent();
-            intent.setClass(this, WelcomeActivity.class);
+            intent.setClass(this, WorkPageActivity.class);
             startActivity(intent, null);
         }
     }
