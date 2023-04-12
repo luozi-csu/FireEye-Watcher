@@ -1,6 +1,6 @@
 import logging
 from flask import Blueprint, request, session
-from model import User
+from model import User, Token
 from service import UserService
 from repository import UserRepository
 from database import db
@@ -155,7 +155,7 @@ def login():
     session[user.name] = token
     
     return response_success(
-        data={"token":token},
+        data=Token(jwt=token, desc="login successfully, please set token in headers").to_json(),
         desc="login successfully, please set token in headers"
     )
 
