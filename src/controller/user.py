@@ -159,6 +159,22 @@ def login():
         desc="login successfully, please set token in headers"
     )
 
+@user_controller.post("/auth/register")
+def register():
+    body = request.get_json()
+    name = body.get("name", "")
+    password = body.get("password", "")
+    if not valid(name, password):
+        return response_failed("invalid username or password")
+    
+    password = ctx.hash(password)
+    user = User(name=name, password=password)
+
+    return response_success(
+        data=user_service.create_user(user).to_json(),
+        desc="register successfully"
+    )
+
 @user_controller.post("/auth/logout")
 def logout():
     """

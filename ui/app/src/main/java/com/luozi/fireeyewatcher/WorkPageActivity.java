@@ -16,6 +16,7 @@ public class WorkPageActivity extends AppCompatActivity implements View.OnClickL
 
     private TextView tv_title;
     private TextView tv_camera;
+    private TextView tv_record;
     private TextView tv_me;
     private CameraFragment cameraFragment;
     private FragmentManager fragmentManager;
@@ -28,9 +29,11 @@ public class WorkPageActivity extends AppCompatActivity implements View.OnClickL
 
         tv_title = findViewById(R.id.tv_title);
         tv_camera = findViewById(R.id.tv_camera);
+        tv_record = findViewById(R.id.tv_record);
         tv_me = findViewById(R.id.tv_me);
 
         tv_camera.setOnClickListener(this);
+        tv_record.setOnClickListener(this);
         tv_me.setOnClickListener(this);
 
         fragmentManager = getSupportFragmentManager();
@@ -40,6 +43,7 @@ public class WorkPageActivity extends AppCompatActivity implements View.OnClickL
 
     private void setSelected() {
         tv_camera.setSelected(false);
+        tv_record.setSelected(false);
         tv_me.setSelected(false);
     }
 
@@ -61,6 +65,16 @@ public class WorkPageActivity extends AppCompatActivity implements View.OnClickL
                     transaction.add(R.id.fragment_content, cameraFragment);
                 }
                 transaction.show(cameraFragment);
+                break;
+            case R.id.tv_record:
+                setSelected();;
+                tv_record.setSelected(true);
+                tv_title.setText("记录");
+                break;
+            case R.id.tv_me:
+                setSelected();
+                tv_me.setSelected(true);
+                tv_title.setText("我");
                 break;
         }
         transaction.commitAllowingStateLoss();

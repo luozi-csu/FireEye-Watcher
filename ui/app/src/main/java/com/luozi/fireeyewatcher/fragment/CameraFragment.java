@@ -2,173 +2,188 @@ package com.luozi.fireeyewatcher.fragment;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.ClipData;
+import android.content.ContentValues;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.Button;
 
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.camera.core.CameraSelector;
+import androidx.camera.core.Preview;
+import androidx.camera.lifecycle.ProcessCameraProvider;
+import androidx.camera.video.MediaStoreOutputOptions;
+import androidx.camera.video.PendingRecording;
+import androidx.camera.video.Quality;
+import androidx.camera.video.QualitySelector;
+import androidx.camera.video.Recorder;
+import androidx.camera.video.Recording;
+import androidx.camera.video.VideoCapture;
+import androidx.camera.video.VideoRecordEvent;
+import androidx.camera.view.PreviewView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.core.content.FileProvider;
+import androidx.core.content.PermissionChecker;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.LifecycleOwner;
 
-import com.luozi.fireeyewatcher.BuildConfig;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.luozi.fireeyewatcher.R;
-import com.luozi.fireeyewatcher.http.HttpClient;
-import com.luozi.fireeyewatcher.http.HttpRequest;
-import com.luozi.fireeyewatcher.http.HttpResponse;
 import com.luozi.fireeyewatcher.utils.DateUtil;
+import com.luozi.fireeyewatcher.utils.ToastCustom;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 
-public class CameraFragment extends Fragment implements View.OnClickListener {
-    private View view;
+public class CameraFragment extends Fragment {
+
     private Context context;
-    private TextView tv_camera_big;
+    private View view;
+    private Button btn_video;
+    private PreviewView viewFinder;
+    private VideoCapture<Recorder> videoCapture;
+    private Recording recording;
+    private static List<String> REQUIRED_PERMISSIONS;
+    private static final int REQUEST_CODE_PERMISSIONS = 10;
+    private static final String PREFIX = "FireEye_";
     private static final String LOG_TAG = "CAMERA_FRAGMENT";
-    private ActivityResultLauncher launcher;
-
-    private static class HttpResponseBuffer {
-        private HttpResponse response;
-        private boolean valueSet = false;
-
-        public synchronized void put(HttpResponse response) {
-            if (valueSet) {
-                try {
-                    wait(1000000);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-            this.response = response;
-            valueSet = true;
-            notify();
-        }
-
-        public synchronized HttpResponse get() {
-            if (!valueSet) {
-                try {
-                    wait(1000000);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-            valueSet = false;
-            notify();
-            return this.response;
-        }
-    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         context = getActivity();
-        launcher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
-            @Override
-            public void onActivityResult(ActivityResult result) {
-                Toast.makeText(context, "拍摄完成", Toast.LENGTH_SHORT).show();
-//                Intent intent = result.getData();
-//                Bundle bundle = intent.getExtras();
-//                String tmp = bundle.getString("dat");
-//                Toast.makeText(context, tmp, Toast.LENGTH_SHORT).show();
-//                HttpResponseBuffer responseBuffer = new HttpResponseBuffer();
-//                new Thread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        String absPath = context.getExternalFilesDir(Environment.DIRECTORY_MOVIES).getAbsolutePath() + "/" + videoname;
-//
-//                        BufferedInputStream bis = null;
-//                        byte[] body_data = null;
-//                        try {
-//                            bis = new BufferedInputStream(new FileInputStream(absPath));
-//                        } catch (FileNotFoundException e) {
-//                            throw new RuntimeException(e);
-//                        }
-//                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-//                        int c = 0;
-//                        byte[] buffer = new byte[8 * 1024];
-//                        try {
-//                            while ((c = bis.read(buffer)) != -1) {
-//                                baos.write(buffer, 0, c);
-//                                baos.flush();
-//                            }
-//                            body_data = baos.toByteArray();
-//                            baos.close();;
-//                        } catch (IOException e) {
-//                            throw new RuntimeException(e);
-//                        }
-//                        HttpClient client = new HttpClient();
-//                        HttpResponse response = client.doFileUpload("http://10.0.2.2:8080/api/v1/upload", null, videoname, body_data, "utf-8");
-//                        responseBuffer.put(response);
-//                    }
-//                }).start();
-//
-//                HttpResponse response = responseBuffer.get();
-//                Log.d(LOG_TAG, response.toString());
-            }
-        });
+        REQUIRED_PERMISSIONS = new ArrayList<>();
+        REQUIRED_PERMISSIONS.add(Manifest.permission.CAMERA);
+        REQUIRED_PERMISSIONS.add(Manifest.permission.RECORD_AUDIO);
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+            REQUIRED_PERMISSIONS.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        }
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_camera, container, false);
-        tv_camera_big = view.findViewById(R.id.tv_camera_big);
-        tv_camera_big.setOnClickListener(this);
+        btn_video = view.findViewById(R.id.btn_video);
+        viewFinder = view.findViewById(R.id.viewFinder);
+
+        if (allPermissionGranted()) {
+            startCamera();
+        } else {
+            ActivityCompat.requestPermissions(
+                    (Activity) context,
+                    REQUIRED_PERMISSIONS.toArray(new String[REQUIRED_PERMISSIONS.size()]),
+                    REQUEST_CODE_PERMISSIONS
+            );
+        }
+
+        btn_video.setOnClickListener(view -> {
+            if (videoCapture == null) {
+                return;
+            }
+
+            btn_video.setEnabled(false);
+
+            Recording curRecording = recording;
+            if (curRecording != null) {
+                curRecording.stop();
+                recording = null;
+                return;
+            }
+
+            String name = PREFIX + DateUtil.timeNow();
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, name);
+            contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "video/mp4");
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
+                contentValues.put(MediaStore.Images.Media.RELATIVE_PATH, "Movies/FireEye-Watcher");
+            }
+
+            MediaStoreOutputOptions outputOptions = new MediaStoreOutputOptions.Builder(
+                    context.getContentResolver(), MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+            ).setContentValues(contentValues).build();
+
+            PendingRecording pendingRecording = videoCapture.getOutput()
+                    .prepareRecording(context, outputOptions);
+
+            if (PermissionChecker.checkSelfPermission(context,
+                    Manifest.permission.RECORD_AUDIO) == PermissionChecker.PERMISSION_GRANTED) {
+                pendingRecording.withAudioEnabled();
+            }
+
+            recording = pendingRecording.start(
+                    ContextCompat.getMainExecutor(context),
+                    videoRecordEvent -> {
+                        if (videoRecordEvent instanceof VideoRecordEvent.Start) {
+                            btn_video.setBackground(context.getDrawable(R.drawable.capture_stop_shape));
+                            btn_video.setEnabled(true);
+                        }
+                        else if (videoRecordEvent instanceof VideoRecordEvent.Finalize) {
+                            if (!((VideoRecordEvent.Finalize) videoRecordEvent).hasError()) {
+                                ToastCustom.custom(context, "拍摄成功");
+                            }
+                            else {
+                                if (recording != null) {
+                                    recording.close();
+                                }
+                                recording = null;
+
+                                Log.e(LOG_TAG, String.format("video capture failed, error: %s", ((VideoRecordEvent.Finalize) videoRecordEvent).getError()));
+                            }
+                            btn_video.setBackground(context.getDrawable(R.drawable.capture_ready_shape));
+                            btn_video.setEnabled(true);
+                        }
+                    }
+            );
+        });
+
         return view;
     }
 
-    @Override
-    public void onClick(View view) {
-        if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions((Activity) context, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
-        }
-        String videoname = "FireEye_" + DateUtil.timeNow() + ".mp4";
-        File videoFile = new File(context.getExternalFilesDir(Environment.DIRECTORY_MOVIES).getAbsolutePath(), videoname);
-//        Log.d(LOG_TAG, context.getExternalFilesDir(Environment.DIRECTORY_MOVIES).getAbsolutePath());
-        try {
-            if (videoFile.exists()) {
-                videoFile.delete();
+    private boolean allPermissionGranted() {
+        boolean granted = true;
+        for (String permission: REQUIRED_PERMISSIONS) {
+            if (ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_DENIED) {
+                Log.e(LOG_TAG, String.format("permission denied: %s", permission));
+                granted = false;
             }
-            videoFile.createNewFile();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
+        return granted;
+    }
 
-        Uri videoUri;
-        if (Build.VERSION.SDK_INT >= 24) {
-            videoUri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID, videoFile);
-        } else {
-            videoUri = Uri.fromFile(videoFile);
-        }
+    private void startCamera() {
+        ListenableFuture<ProcessCameraProvider> cameraProviderFuture = ProcessCameraProvider.getInstance(context);
 
-        Intent intent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
-        intent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY, 1);
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, videoUri);
-        launcher.launch(intent);
+        cameraProviderFuture.addListener(() -> {
+            try {
+                ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
+                Preview preview = new Preview.Builder().build();
+                preview.setSurfaceProvider(viewFinder.getSurfaceProvider());
+                CameraSelector cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA;
+
+                Recorder recorder = new Recorder.Builder()
+                        .setQualitySelector(QualitySelector.from(Quality.HIGHEST))
+                        .build();
+                videoCapture = VideoCapture.withOutput(recorder);
+
+                cameraProvider.unbindAll();
+                cameraProvider.bindToLifecycle(
+                        (LifecycleOwner) context, cameraSelector, preview, videoCapture
+                );
+
+            } catch (ExecutionException | InterruptedException e) {
+                Log.e(LOG_TAG, String.format("get camera provider failed, error: %s", e.getLocalizedMessage()));
+                throw new RuntimeException(e);
+            }
+
+        }, ContextCompat.getMainExecutor(context));
     }
 }
