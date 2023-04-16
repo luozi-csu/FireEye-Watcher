@@ -1,0 +1,3 @@
+name: "logger"
+level: "DEBUG"
+file: "/var/log/fireeye.log"

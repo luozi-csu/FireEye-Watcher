@@ -1,2 +1,3 @@
+host: 0.0.0.0
 port: 8080
 secret: "38db67b3f6125f780f79bac996ccc1c8b03aaf57a901631ca8916b65db5bba00"

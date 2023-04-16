@@ -7,6 +7,8 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,11 +34,15 @@ import org.apache.hc.client5.http.impl.nio.PoolingAsyncClientConnectionManagerBu
 import org.apache.hc.core5.concurrent.FutureCallback;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.Method;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.sql.Array;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class RegisterFragment extends Fragment {
@@ -50,6 +56,7 @@ public class RegisterFragment extends Fragment {
     private Button btn_register;
     private TextView tv_back_to_login;
     private ProgressBar pb_register;
+    private static List<String> existedUsers;
     private static final String LOG_TAG = "REGISTER_FRAGMENT";
 
     private class RegisterRequestCallback implements FutureCallback<SimpleHttpResponse> {
@@ -71,7 +78,7 @@ public class RegisterFragment extends Fragment {
                     ToastCustom.custom(context, "远程服务器异常");
                     throw new RuntimeException("remote server error");
                 } else if (statusCode >= Common.STATUS_REQUEST_ERROR) {
-                    ToastCustom.custom(context, String.format("请求错误: %S", desc));
+                    ToastCustom.custom(context, String.format("请求错误: %s", desc));
                     throw new RuntimeException("register request error");
                 }
 
@@ -102,6 +109,56 @@ public class RegisterFragment extends Fragment {
         }
     }
 
+    private class GetUsersRequestCallback implements FutureCallback<SimpleHttpResponse> {
+
+        @Override
+        public void completed(SimpleHttpResponse httpResponse) {
+            try {
+                if (httpResponse == null) {
+                    throw new RuntimeException("empty http response");
+                }
+
+                if (existedUsers == null) {
+                    existedUsers = new ArrayList<>();
+                }
+
+                JSONObject jsonResponse = new JSONObject(httpResponse.getBodyText());
+
+                int statusCode = jsonResponse.getInt("status_code");
+                String desc = jsonResponse.getString("desc");
+                JSONArray users = jsonResponse.getJSONArray("data");
+
+                if (statusCode >= Common.STATUS_REQUEST_ERROR) {
+                    ToastCustom.custom(context, "远程服务器异常");
+                    throw new RuntimeException("remote server error");
+                } else if (statusCode >= Common.STATUS_REQUEST_ERROR) {
+                    ToastCustom.custom(context, String.format("请求错误: %s", desc));
+                    throw new RuntimeException("register request error");
+                }
+
+                for (int i = 0; i < users.length(); i++) {
+                    User user = User.parseFromJson(users.getJSONObject(i));
+                    existedUsers.add(user.username);
+                }
+
+                Log.d(LOG_TAG, existedUsers.toString());
+
+            } catch (RuntimeException | JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public void failed(Exception e) {
+            Log.e(LOG_TAG, String.format("get all users failed, error: %s", e.getLocalizedMessage()));
+        }
+
+        @Override
+        public void cancelled() {
+            Log.d(LOG_TAG, "get all users request has been cancelled");
+        }
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -117,6 +174,15 @@ public class RegisterFragment extends Fragment {
         client = HttpAsyncClients.custom()
                 .setConnectionManager(poolingAsyncClientConnectionManager)
                 .build();
+        URI uri = null;
+        try {
+            uri = new URI("http://10.0.2.2:8080/api/v1/users");
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+        SimpleHttpRequest request = new SimpleHttpRequest(Method.GET, uri);
+        client.start();
+        client.execute(request, new GetUsersRequestCallback());
     }
 
     @Override
@@ -129,6 +195,35 @@ public class RegisterFragment extends Fragment {
         btn_register = view.findViewById(R.id.btn_register);
         tv_back_to_login = view.findViewById(R.id.tv_back_to_login);
         pb_register = view.findViewById(R.id.pb_register);
+
+        et_username.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                // do nothing
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                // do nothing
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                if (existedUsers == null || existedUsers.size() == 0) {
+                    return;
+                }
+
+                String curUsername = editable.toString();
+                for (String existedName: existedUsers) {
+                    if (curUsername.compareTo(existedName) == 0) {
+                        ToastCustom.custom(context, "账户已存在");
+                        btn_register.setEnabled(false);
+                        return;
+                    }
+                }
+                btn_register.setEnabled(true);
+            }
+        });
 
         btn_register.setOnClickListener(view -> {
             InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);

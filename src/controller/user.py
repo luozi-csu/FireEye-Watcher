@@ -1,4 +1,4 @@
-import logging
+from log import logger
 from flask import Blueprint, request, session
 from model import User, Token
 from service import UserService
@@ -15,10 +15,10 @@ ctx = CryptContext(schemes=["bcrypt"])
 
 def valid(name: str, password: str) -> bool:
     if name == "" or password == "":
-        logging.error("empty username or password")
+        logger.error("empty username or password")
         return False
     elif len(password) < 6:
-        logging.error("length of password is shorter than 6")
+        logger.error("length of password is shorter than 6")
         return False
     return True
 
@@ -64,13 +64,22 @@ def create_users():
     name = body.get("name", "")
     password = body.get("password", "")
     if not valid(name, password):
-        return response_failed("invalid username or password")
+        return response_failed(400, "invalid username or password")
+    
+    users = user_service.list_users()
+    for user in users:
+        if name == user.name:
+            return response_failed(400, "username already existed")
     
     password = ctx.hash(password)
     user = User(name=name, password=password)
+    user = user_service.create_user(user)
+
+    if user == None:
+        return response_failed(500, "create user failed")
 
     return response_success(
-        user_service.create_user(user).to_json(), 
+        user.to_json(), 
         "create user successfully"
     )
 
@@ -86,21 +95,28 @@ def update_user():
     @Success 200 model.User
     @Router /api/v1/users [put]
     """
+    name = request.args.get("name", "")
     body = request.get_json()
-    name = body.get("name", "")
-    password = body.get("password", "")
+    new_user = body.get("new_user", None)
+
+    if new_user == None:
+        logger.error("empty update user input")
+        return response_failed(400, "empty update user input")
+    
+    password = new_user.get("password", "")
+
     if not valid(name, password):
-        return response_failed("invalid username or password")
+        return response_failed(400, "invalid username or password")
     
-    user = user_service.get_user(name)
+    user = User(name=name)
+    user.password = ctx.hash(password)
+    user = user_service.update_user(name, user)
+
     if user == None:
-        logging.error("user not found")
-        return response_failed("user not found")
-    
-    user.password = ctx.hash(user.password)
+        return response_failed(500, "update user failed")
 
     return response_success(
-        user_service.update_user(name, user).to_json(),
+        user.to_json(),
         "update user successfully"
     )
 
@@ -117,8 +133,8 @@ def delete_user():
     """
     name = request.args.get("name", "")
     if name == "":
-        logging.error("empty username")
-        return response_failed("empty username")
+        logger.error("empty username")
+        return response_failed(400, "empty username")
     
     user_service.delete_user(name)
 
@@ -140,16 +156,16 @@ def login():
     name = body.get("name", "")
     password = body.get("password", "")
     if not valid(name, password):
-        return response_failed("invalid username or password")
+        return response_failed(400, "invalid username or password")
     
     user = user_service.get_user(name)
     if user == None:
-        logging.error("user not found")
-        return response_failed("user not found")
+        logger.error("user not found")
+        return response_failed(400, "user not found")
     
     if not ctx.verify(password, user.password):
-        logging.error("wrong password")
-        return response_failed("wrong password")
+        logger.error("wrong password")
+        return response_failed(400, "wrong password")
     
     token = gen_jwt(user)
     session[user.name] = token
@@ -165,13 +181,22 @@ def register():
     name = body.get("name", "")
     password = body.get("password", "")
     if not valid(name, password):
-        return response_failed("invalid username or password")
+        return response_failed(400, "invalid username or password")
+    
+    users = user_service.list_users()
+    for user in users:
+        if name == user.name:
+            return response_failed(400, "username already existed")
     
     password = ctx.hash(password)
     user = User(name=name, password=password)
+    user = user_service.create_user(user)
+
+    if user == None:
+        return response_failed(500, "create user failed")
 
     return response_success(
-        data=user_service.create_user(user).to_json(),
+        data=user.to_json(),
         desc="register successfully"
     )
 

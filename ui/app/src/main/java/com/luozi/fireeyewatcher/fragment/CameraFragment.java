@@ -5,8 +5,11 @@ import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -30,18 +33,51 @@ import androidx.camera.video.VideoRecordEvent;
 import androidx.camera.view.PreviewView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import androidx.core.content.PermissionChecker;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LifecycleOwner;
 
 import com.google.common.util.concurrent.ListenableFuture;
+import com.luozi.fireeyewatcher.BuildConfig;
 import com.luozi.fireeyewatcher.R;
+import com.luozi.fireeyewatcher.http.Common;
 import com.luozi.fireeyewatcher.utils.DateUtil;
 import com.luozi.fireeyewatcher.utils.ToastCustom;
 
+import org.apache.hc.client5.http.async.methods.SimpleHttpRequest;
+import org.apache.hc.client5.http.async.methods.SimpleHttpResponse;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.config.ConnectionConfig;
+import org.apache.hc.client5.http.entity.mime.FileBody;
+import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
+import org.apache.hc.client5.http.impl.async.CloseableHttpAsyncClient;
+import org.apache.hc.client5.http.impl.async.HttpAsyncClients;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.nio.PoolingAsyncClientConnectionManager;
+import org.apache.hc.client5.http.impl.nio.PoolingAsyncClientConnectionManagerBuilder;
+import org.apache.hc.core5.concurrent.FutureCallback;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.HttpException;
+import org.apache.hc.core5.http.Method;
+import org.apache.hc.core5.http.io.HttpClientResponseHandler;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class CameraFragment extends Fragment {
 
@@ -51,6 +87,7 @@ public class CameraFragment extends Fragment {
     private PreviewView viewFinder;
     private VideoCapture<Recorder> videoCapture;
     private Recording recording;
+    private static CloseableHttpClient client;
     private static List<String> REQUIRED_PERMISSIONS;
     private static final int REQUEST_CODE_PERMISSIONS = 10;
     private static final String PREFIX = "FireEye_";
@@ -104,7 +141,7 @@ public class CameraFragment extends Fragment {
             contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, name);
             contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "video/mp4");
             if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
-                contentValues.put(MediaStore.Images.Media.RELATIVE_PATH, "Movies/FireEye-Watcher");
+                contentValues.put(MediaStore.Video.Media.RELATIVE_PATH, "Movies/FireEye-Watcher");
             }
 
             MediaStoreOutputOptions outputOptions = new MediaStoreOutputOptions.Builder(
@@ -128,7 +165,19 @@ public class CameraFragment extends Fragment {
                         }
                         else if (videoRecordEvent instanceof VideoRecordEvent.Finalize) {
                             if (!((VideoRecordEvent.Finalize) videoRecordEvent).hasError()) {
-                                ToastCustom.custom(context, "拍摄成功");
+                                // get video file
+                                String[] projection = {MediaStore.MediaColumns.DATA};
+                                Cursor cursor = context.getContentResolver().query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, projection, null, null, null);
+                                cursor.moveToLast();
+                                int columnIndex = cursor.getColumnIndex(projection[0]);
+                                String videoPath = cursor.getString(columnIndex);
+                                File video = new File(videoPath);
+                                cursor.close();
+
+                                // upload video
+                                ThreadPoolExecutor executor = new ThreadPoolExecutor(1, 2, 1000, TimeUnit.MILLISECONDS,
+                                        new LinkedBlockingDeque<Runnable>(), Executors.defaultThreadFactory(), new ThreadPoolExecutor.AbortPolicy());
+                                executor.execute(new VideoUploadThreadTask(video));
                             }
                             else {
                                 if (recording != null) {
@@ -185,5 +234,33 @@ public class CameraFragment extends Fragment {
             }
 
         }, ContextCompat.getMainExecutor(context));
+    }
+
+    private class VideoUploadThreadTask implements Runnable {
+
+        private File video;
+
+        VideoUploadThreadTask(File video) {
+            this.video = video;
+        }
+
+        @Override
+        public void run() {
+            if (client == null) {
+                client = HttpClients.createDefault();
+            }
+
+            try {
+                HttpPost httpPost = new HttpPost("http://10.0.2.2:8080/api/v1/upload");
+                FileBody body = new FileBody(video);
+                HttpEntity entity = MultipartEntityBuilder.create().addPart("upload", body).build();
+                httpPost.setEntity(entity);
+
+                // todo: video upload callback
+                client.execute(httpPost, response -> null);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }

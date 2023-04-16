@@ -5,9 +5,9 @@ def response_success(data: any, desc: str):
         "desc": desc
     }
 
-def response_failed(desc: str):
+def response_failed(status_code: int, desc: str):
     return {
-        "status_code": 400,
+        "status_code": status_code,
         "data": None,
         "desc": desc
     }
