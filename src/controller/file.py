@@ -37,7 +37,7 @@ def process_video(uid, path):
 @file_controller.post("/upload")
 def upload_file():
     f = request.files['upload']
-    path = "tmp/upload/fireeye/" + f.filename
+    path = "/var/upload/fireeye/" + f.filename
     f.save(path)
 
     token = request.headers.get("Authorization")
