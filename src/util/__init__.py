@@ -1,1 +1,1 @@
-from util.jwt import gen_jwt
+from util.jwt import *

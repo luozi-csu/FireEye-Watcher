@@ -168,8 +168,7 @@ def login():
         return response_failed(400, "wrong password")
     
     token = gen_jwt(user)
-    session[user.name] = token
-    
+
     return response_success(
         data=Token(jwt=token, desc="login successfully, please set token in headers").to_json(),
         desc="login successfully, please set token in headers"
@@ -207,11 +206,8 @@ def logout():
     @Description logout
     @Produce json
     @Tags user
-    @Param name param str true "username"
     @Success 200 None
     @Router /api/v1/auth/logout [post]
     """
-    name = request.args.get("name", "")
-    session.pop(name, None)
-    
+    # stateless logout
     return response_success(None, "logout successfully")

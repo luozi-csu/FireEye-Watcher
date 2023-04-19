@@ -1,1 +1,2 @@
 from repository.user import UserRepository
+from repository.record import RecordRepository

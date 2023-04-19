@@ -176,7 +176,7 @@ public class RegisterFragment extends Fragment {
                 .build();
         URI uri = null;
         try {
-            uri = new URI("http://10.0.2.2:8080/api/v1/users");
+            uri = new URI("http://121.37.255.1:8080/api/v1/users");
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
@@ -254,7 +254,7 @@ public class RegisterFragment extends Fragment {
 
             URI uri = null;
             try {
-                uri = new URI("http://10.0.2.2:8080/api/v1/auth/register");
+                uri = new URI("http://121.37.255.1:8080/api/v1/auth/register");
             } catch (URISyntaxException e) {
                 throw new RuntimeException(e);
             }

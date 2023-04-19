@@ -7,7 +7,7 @@ class UserRepository:
         self.cursor = self.conn.cursor()
 
     def get_user_by_id(self, id: int) -> User:
-        sql = "SELECT `id`, `name`, `password` from `users` WHERE `id`=%s"
+        sql = "SELECT `id`, `name`, `password` FROM `users` WHERE `id`=%s"
         self.cursor.execute(sql, (id,))
         row = self.cursor.fetchone()
         if row == None:
@@ -15,7 +15,7 @@ class UserRepository:
         return User(id=row["id"], name=row["name"], password=row["password"])
     
     def get_user_by_name(self, name: str) -> User:
-        sql = "SELECT `id`, `name`, `password` from `users` WHERE `name`=%s"
+        sql = "SELECT `id`, `name`, `password` FROM `users` WHERE `name`=%s"
         self.cursor.execute(sql, (name,))
         row = self.cursor.fetchone()
         if row == None:
@@ -23,7 +23,7 @@ class UserRepository:
         return User(id=row["id"], name=row["name"], password=row["password"])
     
     def list_users(self) -> list[User]:
-        sql = "SELECT `id`, `name`, `password` from `users`"
+        sql = "SELECT `id`, `name`, `password` FROM `users`"
         self.cursor.execute(sql)
         rows = self.cursor.fetchall()
         users = list()
