@@ -37,6 +37,7 @@ import androidx.lifecycle.LifecycleOwner;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import com.luozi.fireeyewatcher.R;
+import com.luozi.fireeyewatcher.http.Common;
 import com.luozi.fireeyewatcher.utils.DateUtil;
 
 import org.apache.hc.client5.http.classic.methods.HttpPost;
@@ -229,6 +230,7 @@ public class CameraFragment extends Fragment {
 
             try {
                 HttpPost httpPost = new HttpPost("http://121.37.255.1:8080/api/v1/upload");
+                httpPost.setHeader("Authorization", Common.access_token);
                 FileBody body = new FileBody(video);
                 HttpEntity entity = MultipartEntityBuilder.create().addPart("upload", body).build();
                 httpPost.setEntity(entity);

@@ -16,7 +16,7 @@ class UserRepository:
         return User(id=row["id"], name=row["name"], password=row["password"])
     
     def get_user_by_name(self, name: str) -> User:
-        self.ping(self)
+        self.ping()
         sql = "SELECT `id`, `name`, `password` FROM `users` WHERE `name`=%s"
         self.cursor.execute(sql, (name,))
         row = self.cursor.fetchone()
@@ -25,7 +25,7 @@ class UserRepository:
         return User(id=row["id"], name=row["name"], password=row["password"])
     
     def list_users(self) -> list[User]:
-        self.ping(self)
+        self.ping()
         sql = "SELECT `id`, `name`, `password` FROM `users`"
         self.cursor.execute(sql)
         rows = self.cursor.fetchall()
@@ -35,21 +35,21 @@ class UserRepository:
         return users
     
     def create_user(self, user: User) -> User:
-        self.ping(self)
+        self.ping()
         sql = "INSERT INTO `users` (`name`, `password`) VALUES (%s, %s)"
         self.cursor.execute(sql, (user.name, user.password))
         self.conn.commit()
         return user
     
     def update_user(self, user: User) -> User:
-        self.ping(self)
+        self.ping()
         sql = "UPDATE `users` SET `name`=%s, `password`=%s WHERE `id`=%s"
         self.cursor.execute(sql, (user.name, user.password, user.id))
         self.conn.commit()
         return user
     
     def delete_user(self, user: User):
-        self.ping(self)
+        self.ping()
         sql = "DELETE FROM `users` WHERE `name`=%s"
         self.cursor.execute(sql, (user.name,))
         self.conn.commit()

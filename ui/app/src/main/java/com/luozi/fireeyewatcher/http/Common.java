@@ -10,4 +10,5 @@ public class Common {
     public static final int STATUS_REQUEST_ERROR = 400;
     public static final int STATUS_UNAUTHORIZED = 401;
     public static final int STATUS_SERVER_ERROR = 500;
+    public static String access_token;
 }

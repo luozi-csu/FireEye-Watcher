@@ -80,6 +80,7 @@ public class LoginFragment extends Fragment {
 
                 JWTToken jwtToken = JWTToken.parseFromJson(new JSONObject(data));
                 Log.d(LOG_TAG, String.format("login successfully, token: %s, desc: %s", jwtToken.jwt, desc));
+                Common.access_token = jwtToken.jwt;
                 Intent intent = new Intent();
                 intent.setClass(context, WorkPageActivity.class);
                 startActivity(intent);
