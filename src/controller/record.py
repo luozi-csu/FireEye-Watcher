@@ -9,7 +9,7 @@ record_repository = RecordRepository(conn=db)
 record_service = RecordService(record_repo=record_repository)
 record_controller = Blueprint("record_controller", __name__, url_prefix="/api/v1")
 
-@record_controller.get("/records/")
+@record_controller.get("/records")
 def get_records_by_uid():
     uid = request.args.get("uid", 0)
     if uid == 0:
