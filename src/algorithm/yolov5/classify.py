@@ -41,7 +41,7 @@ def data_process(prefix):
 #ConvLSTM模型预测
 def model_predict(path):
     model = tf.saved_model.load(ROOT / 'mymodel')
-    data = data_process(path.split()[-1].split()[0])
+    data = data_process(path.split("/")[-1].split(".")[0])
     x_test = tf.cast(data, dtype=tf.float32) / 255
     db_test = tf.data.Dataset.from_tensor_slices((x_test))
     db_test = db_test.batch(4)
