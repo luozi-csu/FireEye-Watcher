@@ -170,7 +170,10 @@ def login():
     token = gen_jwt(user)
 
     return response_success(
-        data=Token(jwt=token, desc="login successfully, please set token in headers").to_json(),
+        data=Token(
+            uid=user.id, name=user.name, jwt=token,
+            desc="login successfully, please set token in headers"
+        ).to_json(),
         desc="login successfully, please set token in headers"
     )
 
