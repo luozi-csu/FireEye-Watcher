@@ -37,8 +37,9 @@ class Middleware(object):
         logger.debug(msg)
 
     def authenticate(self, environ: dict):
+        request_method = environ["REQUEST_METHOD"]
         path_info = environ["PATH_INFO"]
-        if path_info in whitelist:
+        if (" ".join([request_method, path_info])) in whitelist:
             return None
 
         token = request.headers.get(authorization, "")
