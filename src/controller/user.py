@@ -1,3 +1,4 @@
+import json
 from log import logger
 from flask import Blueprint, request, session
 from model import User, Token
@@ -6,7 +7,7 @@ from repository import UserRepository
 from database import db
 from passlib.context import CryptContext
 from common import response_success, response_failed
-from util import gen_jwt
+from util import gen_jwt, validate_token
 
 user_repository = UserRepository(conn=db)
 user_service = UserService(user_repo=user_repository)
@@ -96,10 +97,17 @@ def update_user():
     @Router /api/v1/users [put]
     """
     name = request.args.get("name", "")
-    body = request.get_json()
-    new_user = body.get("new_user", None)
+    token = request.headers.get("Authorization")
 
-    if new_user == None:
+    payload, _ = validate_token(token)
+    if payload["name"] != name:
+        logger.error("username not match")
+        return response_failed(400, "username not match")
+
+    body = request.get_json()
+    new_user = json.loads(body.get("new_user", "{}"))
+
+    if not new_user:
         logger.error("empty update user input")
         return response_failed(400, "empty update user input")
     
