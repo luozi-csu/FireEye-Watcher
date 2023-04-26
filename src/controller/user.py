@@ -105,7 +105,7 @@ def update_user():
         return response_failed(400, "username not match")
 
     body = request.get_json()
-    new_user = json.loads(body.get("new_user", "{}"))
+    new_user = body.get("new_user", "{}")
 
     if not new_user:
         logger.error("empty update user input")
