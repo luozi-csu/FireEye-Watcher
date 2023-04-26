@@ -9,4 +9,11 @@ public class DateUtil {
         Date date = new Date(System.currentTimeMillis());
         return formatter.format(date);
     }
+
+    public static String convert(int timestamp) {
+        long longTimestamp = (long)timestamp * 1000;
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date date = new Date(longTimestamp);
+        return formatter.format(date);
+    }
 }

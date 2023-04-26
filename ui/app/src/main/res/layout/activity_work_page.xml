@@ -41,33 +41,30 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:drawableTop="@mipmap/camera_icon"
-            android:drawableTint="@color/theme"
+            android:drawableTop="@drawable/bottom_camera_selector"
             android:drawablePadding="0dp"
             android:gravity="center"
-            android:textColor="@color/theme"
+            android:textColor="@drawable/bottom_bar_text_selector"
             android:text="相机"/>
         <TextView
             android:id="@+id/tv_record"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:drawableTop="@mipmap/record_icon"
-            android:drawableTint="@color/theme"
+            android:drawableTop="@drawable/bottom_record_selector"
             android:drawablePadding="0dp"
             android:gravity="center"
-            android:textColor="@color/theme"
+            android:textColor="@drawable/bottom_bar_text_selector"
             android:text="记录" />
         <TextView
             android:id="@+id/tv_me"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:drawableTop="@mipmap/me_icon"
-            android:drawableTint="@color/theme"
+            android:drawableTop="@drawable/bottom_me_selector"
             android:drawablePadding="0dp"
             android:gravity="center"
-            android:textColor="@color/theme"
+            android:textColor="@drawable/bottom_bar_text_selector"
             android:text="我"/>
     </LinearLayout>
 </RelativeLayout>

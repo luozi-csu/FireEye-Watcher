@@ -1,16 +1,19 @@
 package com.luozi.fireeyewatcher;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-
-import android.graphics.Camera;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+
 import com.luozi.fireeyewatcher.fragment.CameraFragment;
+import com.luozi.fireeyewatcher.fragment.RecordFragment;
+import com.luozi.fireeyewatcher.fragment.UserFragment;
+import com.luozi.fireeyewatcher.manager.AppManager;
 
 public class WorkPageActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -19,11 +22,14 @@ public class WorkPageActivity extends AppCompatActivity implements View.OnClickL
     private TextView tv_record;
     private TextView tv_me;
     private CameraFragment cameraFragment;
+    private RecordFragment recordFragment;
+    private UserFragment userFragment;
     private FragmentManager fragmentManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        AppManager.getInstance().addActivity(this);
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_work_page);
 
@@ -49,6 +55,8 @@ public class WorkPageActivity extends AppCompatActivity implements View.OnClickL
 
     private void hideAllFragment(FragmentTransaction transaction) {
         if (cameraFragment != null) transaction.hide(cameraFragment);
+        if (recordFragment != null) transaction.hide(recordFragment);
+        if (userFragment != null) transaction.hide(userFragment);
     }
 
     @Override
@@ -70,13 +78,42 @@ public class WorkPageActivity extends AppCompatActivity implements View.OnClickL
                 setSelected();;
                 tv_record.setSelected(true);
                 tv_title.setText("记录");
+                if (recordFragment == null) {
+                    recordFragment = new RecordFragment();
+                    transaction.add(R.id.fragment_content, recordFragment);
+                }
+                transaction.show(recordFragment);
                 break;
             case R.id.tv_me:
                 setSelected();
                 tv_me.setSelected(true);
                 tv_title.setText("我");
+                if (userFragment == null) {
+                    userFragment = new UserFragment();
+                    transaction.add(R.id.fragment_content, userFragment);
+                }
+                transaction.show(userFragment);
                 break;
         }
         transaction.commitAllowingStateLoss();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        if (cameraFragment != null) transaction.remove(cameraFragment);
+        if (recordFragment != null) transaction.remove(recordFragment);
+        if (userFragment != null) transaction.remove(userFragment);
+        transaction.commitAllowingStateLoss();
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            moveTaskToBack(true);
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
     }
 }

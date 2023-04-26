@@ -47,8 +47,11 @@ import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.core5.http.HttpEntity;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -65,7 +68,7 @@ public class CameraFragment extends Fragment {
     private PreviewView viewFinder;
     private VideoCapture<Recorder> videoCapture;
     private Recording recording;
-    private static CloseableHttpClient client;
+    private CloseableHttpClient client;
     private static List<String> REQUIRED_PERMISSIONS;
     private static final int REQUEST_CODE_PERMISSIONS = 10;
     private static final String PREFIX = "FireEye_";

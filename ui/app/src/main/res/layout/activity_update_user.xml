@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/ll_head"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="35dp">
+
+        <ImageView
+            android:id="@+id/symbol"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            />
+
+        <TextView
+            android:layout_marginLeft="20dp"
+            android:id="@+id/tv_title"
+            android:layout_width="wrap_content"
+            android:layout_marginTop="35dp"
+            android:text="@string/format_app_name"
+            android:textColor="@color/theme"
+            android:textSize="24sp"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <EditText
+        app:layout_constraintTop_toBottomOf="@id/ll_head"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:id="@+id/et_new_pswd"
+        android:textCursorDrawable="@drawable/cursor_color"
+        android:singleLine="true"
+        android:layout_width="320dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:paddingLeft="10dp"
+        android:theme="@style/MyEditText"
+        android:drawablePadding="10dp"
+        android:drawableLeft="@mipmap/password_icon"
+        android:drawableTint="@color/gray"
+        android:textColor="@color/black"
+        android:layout_marginTop="60dp"
+        android:hint="密码"
+        android:textSize="20sp"
+        android:inputType="textPassword"/>
+
+    <EditText
+        app:layout_constraintTop_toBottomOf="@id/et_new_pswd"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:id="@+id/et_new_pswd_check"
+        android:textCursorDrawable="@drawable/cursor_color"
+        android:singleLine="true"
+        android:layout_width="320dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="10dp"
+        android:hint="确认密码"
+        android:drawablePadding="10dp"
+        android:drawableLeft="@mipmap/right_icon"
+        android:drawableTint="@color/gray"
+        android:textColor="@color/black"
+        android:paddingLeft="10dp"
+        android:theme="@style/MyEditText"
+        android:textSize="20sp"
+        android:inputType="textPassword"/>
+
+    <Button
+        app:layout_constraintTop_toBottomOf="@id/et_new_pswd_check"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:id="@+id/btn_confirm"
+        android:text="确认"
+        android:background="@drawable/btn_pressed_selector"
+        android:textSize="24sp"
+        android:textColor="@color/white"
+        android:layout_gravity="center"
+        android:layout_marginTop="20dp"
+        android:layout_width="320dp"
+        android:layout_height="wrap_content"/>
+
+    <ProgressBar
+        android:id="@+id/pb_update"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="187dp"
+        android:visibility="invisible"
+        android:indeterminateTintMode="src_atop"
+        android:indeterminateTint="@color/theme"/>
+</androidx.constraintlayout.widget.ConstraintLayout>

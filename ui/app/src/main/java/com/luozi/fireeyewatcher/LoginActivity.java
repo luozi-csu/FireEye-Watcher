@@ -1,6 +1,7 @@
 package com.luozi.fireeyewatcher;
 
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.Window;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -9,6 +10,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.luozi.fireeyewatcher.fragment.LoginFragment;
 import com.luozi.fireeyewatcher.fragment.RegisterFragment;
+import com.luozi.fireeyewatcher.manager.AppManager;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -19,6 +21,7 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        AppManager.getInstance().addActivity(this);
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_login);
 
@@ -28,5 +31,23 @@ public class LoginActivity extends AppCompatActivity {
         transaction.add(R.id.fragment_container_login, loginFragment);
         transaction.show(loginFragment);
         transaction.commitAllowingStateLoss();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        if (loginFragment != null) transaction.remove(loginFragment);
+        if (registerFragment != null) transaction.remove(registerFragment);
+        transaction.commitAllowingStateLoss();
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            moveTaskToBack(true);
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
     }
 }

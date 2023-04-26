@@ -1,5 +1,6 @@
 package com.luozi.fireeyewatcher.fragment;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -23,7 +24,9 @@ import androidx.fragment.app.FragmentTransaction;
 import com.luozi.fireeyewatcher.R;
 import com.luozi.fireeyewatcher.WorkPageActivity;
 import com.luozi.fireeyewatcher.http.Common;
+import com.luozi.fireeyewatcher.manager.AppManager;
 import com.luozi.fireeyewatcher.model.JWTToken;
+import com.luozi.fireeyewatcher.model.User;
 import com.luozi.fireeyewatcher.utils.ToastCustom;
 
 import org.apache.hc.client5.http.async.methods.SimpleHttpRequest;
@@ -81,10 +84,11 @@ public class LoginFragment extends Fragment {
                 JWTToken jwtToken = JWTToken.parseFromJson(new JSONObject(data));
                 Log.d(LOG_TAG, String.format("login successfully, token: %s, desc: %s", jwtToken.jwt, desc));
                 Common.access_token = jwtToken.jwt;
+                Common.loginUser = new User(jwtToken.uid, jwtToken.name, "");
                 Intent intent = new Intent();
                 intent.setClass(context, WorkPageActivity.class);
                 startActivity(intent);
-                ((FragmentActivity)context).finish();
+                AppManager.getInstance().finishActivity((Activity)context);
             } catch (RuntimeException | JSONException e) {
                 e.printStackTrace();
             } finally {

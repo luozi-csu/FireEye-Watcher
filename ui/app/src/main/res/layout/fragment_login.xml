@@ -98,14 +98,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/new_user"/>
-        <TextView
-            android:id="@+id/tv_find_pswd"
-            android:layout_alignParentLeft="true"
-            android:layout_marginLeft="20dp"
-            android:textColor="@color/theme"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/forget_pswd" />
     </RelativeLayout>
 
     <ProgressBar

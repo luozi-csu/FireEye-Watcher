@@ -56,7 +56,7 @@ public class RegisterFragment extends Fragment {
     private Button btn_register;
     private TextView tv_back_to_login;
     private ProgressBar pb_register;
-    private static List<String> existedUsers;
+    private List<String> existedUsers;
     private static final String LOG_TAG = "REGISTER_FRAGMENT";
 
     private class RegisterRequestCallback implements FutureCallback<SimpleHttpResponse> {
@@ -236,11 +236,13 @@ public class RegisterFragment extends Fragment {
 
             if (username.isEmpty() || password.isEmpty()) {
                 ToastCustom.custom(context, "账号或密码为空");
+                btn_register.setEnabled(true);
                 return;
             }
 
             if (password.compareTo(checkPassword) != 0) {
                 ToastCustom.custom(context, "两次输入密码不一致");
+                btn_register.setEnabled(true);
                 return;
             }
 
