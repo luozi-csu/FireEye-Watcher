@@ -18,6 +18,7 @@ def gen_jwt(user: User):
     payload = {
         "id": user.id,
         "name": user.name,
+        "lastLoginTime": int(time.time()),
         "exp": exp
     }
     token = jwt.encode(payload=payload, key=salt, algorithm="HS256", headers=headers)
