@@ -7,7 +7,7 @@ FireEye Watcher是一个铝电解槽过热度在线识别系统。它提供Andro
 FireEye Watcher有如下主要特点：
 
 * 客户端采用Android（Java）开发，服务端采用Flask（Python）开发
-* 简洁易用的界面，支持视频实时预览，异步更新和查询记录、
+* 简洁易用的界面，支持视频实时预览，异步更新和查询记录
 * 客户端基于Apache HttpComponents Client实现网络通信
 * 服务端基于MVC模式，采用MySQL存储数据，提供用户管理和JWTToken鉴权
 * 算法模型采用YOLOv5+ConvLSTM
