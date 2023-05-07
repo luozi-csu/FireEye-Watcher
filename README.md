@@ -45,7 +45,7 @@ FireEye Watcher有如下主要特点：
 服务端结构如下：
 
 ```
-src
+./src
 ├─algorithm
 ├─common
 ├─controller
