@@ -8,17 +8,18 @@ headers = {
 }
 
 salt = "fireeyewatcher"
-exp = int(time.time() + 24 * 3600)
 
 EXPIRED_ERROR = 1
 DECODE_ERROR = 2
 INVALID_TOKEN_ERROR = 3
 
 def gen_jwt(user: User):
+    now = int(time.time())
+    exp = now + 24 * 3600
     payload = {
         "id": user.id,
         "name": user.name,
-        "lastLoginTime": int(time.time()),
+        "lastLoginTime": now,
         "exp": exp
     }
     token = jwt.encode(payload=payload, key=salt, algorithm="HS256", headers=headers)
