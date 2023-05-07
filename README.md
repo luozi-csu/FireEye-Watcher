@@ -74,8 +74,9 @@ FireEye Watcher有如下主要特点：
 安卓设备（Android 9.0及以上）可直接安装ui/app/release目录下的apk包，服务端部署前需要确保你的主机上有Python3环境。
 
 ```
+cd src
 # 安装依赖
-pip install -r src/requirements.txt
+pip install -r requirements.txt
 # 运行服务器后台进程
-python src/main.py &
+python main.py &
 ```
