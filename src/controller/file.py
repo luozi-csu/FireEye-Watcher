@@ -1,5 +1,4 @@
 import os
-import sys
 import time
 import shutil
 from log import logger
@@ -13,12 +12,6 @@ from algorithm.yolov5 import detect, classify
 from multiprocessing import Process
 from util import *
 from pathlib import Path
-
-FILE = Path(__file__).resolve()
-ROOT = FILE.parents[0]
-if str(ROOT) not in sys.path:
-    sys.path.append(str(ROOT))
-ROOT = Path(os.path.relpath(ROOT, Path.cwd()))
 
 record_repository = RecordRepository(conn=db)
 record_service = RecordService(record_repo=record_repository)
