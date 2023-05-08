@@ -30,15 +30,10 @@
                 <ImageView
                     android:id="@+id/iv_background"
                     android:layout_width="match_parent"
-                    android:layout_height="100dp"
+                    android:layout_height="150dp"
                     app:layout_constraintTop_toTopOf="parent"
                     android:scaleType="centerCrop"
                     android:src="@drawable/background"/>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="50dp"
-                    app:layout_constraintTop_toBottomOf="@id/iv_background"/>
 
                 <com.luozi.fireeyewatcher.view.CircleImageView
                     android:layout_width="80dp"
@@ -67,7 +62,7 @@
         <com.luozi.fireeyewatcher.view.CornerListView
             android:id="@+id/setting_list"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="160dp"
             android:layout_margin="5dp"
             android:background="@drawable/shape_bg_listview"
             android:dividerHeight="1px"

@@ -22,7 +22,7 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.luozi.fireeyewatcher.R;
-import com.luozi.fireeyewatcher.WorkPageActivity;
+import com.luozi.fireeyewatcher.activity.WorkPageActivity;
 import com.luozi.fireeyewatcher.http.Common;
 import com.luozi.fireeyewatcher.manager.AppManager;
 import com.luozi.fireeyewatcher.model.JWTToken;

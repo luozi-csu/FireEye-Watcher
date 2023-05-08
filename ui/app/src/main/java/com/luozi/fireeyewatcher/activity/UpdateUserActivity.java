@@ -1,4 +1,4 @@
-package com.luozi.fireeyewatcher;
+package com.luozi.fireeyewatcher.activity;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -14,6 +14,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 
+import com.luozi.fireeyewatcher.R;
 import com.luozi.fireeyewatcher.http.Common;
 import com.luozi.fireeyewatcher.manager.AppManager;
 import com.luozi.fireeyewatcher.model.User;

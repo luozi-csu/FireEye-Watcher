@@ -24,7 +24,7 @@
             android:id="@+id/tv_title"
             android:layout_width="wrap_content"
             android:layout_marginTop="35dp"
-            android:text="@string/format_app_name"
+            android:text="修改密码"
             android:textColor="@color/theme"
             android:textSize="24sp"
             android:layout_height="wrap_content" />

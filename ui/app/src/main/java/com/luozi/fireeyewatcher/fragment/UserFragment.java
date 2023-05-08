@@ -13,17 +13,17 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
 
-import com.luozi.fireeyewatcher.LoginActivity;
-import com.luozi.fireeyewatcher.UpdateUserActivity;
+import com.luozi.fireeyewatcher.activity.LoginActivity;
 import com.luozi.fireeyewatcher.R;
+import com.luozi.fireeyewatcher.activity.UpdateUserActivity;
 import com.luozi.fireeyewatcher.adapter.SettingListAdapter;
 import com.luozi.fireeyewatcher.http.Common;
 import com.luozi.fireeyewatcher.manager.AppManager;
 import com.luozi.fireeyewatcher.view.CornerListView;
 
 import java.util.Arrays;
+import java.util.List;
 
 public class UserFragment extends Fragment {
     private View view;
@@ -31,6 +31,7 @@ public class UserFragment extends Fragment {
     private TextView tv_username;
     private CornerListView setting_list;
     private TextView tv_logout;
+    private static final String[] options = new String[]{"修改密码", "统计信息", "设置", "关于"};
     private static final String LOG_TAG = "USER_FRAGMENT";
 
     @Override
@@ -49,7 +50,7 @@ public class UserFragment extends Fragment {
 
         tv_username.setText(Common.loginUser.username);
 
-        SettingListAdapter settingListAdapter = new SettingListAdapter(context, Arrays.asList(new String[]{"修改密码"}));
+        SettingListAdapter settingListAdapter = new SettingListAdapter(context, Arrays.asList(options));
         setting_list.setAdapter(settingListAdapter);
         setting_list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override

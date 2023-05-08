@@ -61,7 +61,7 @@ public class RecordAdapter extends BaseAdapter {
         }
 
         Record record = recordList.get(i);
-        holder.tv_record_title.setText(String.format("记录%d", record.id));
+        holder.tv_record_title.setText(String.format("记录(ID:%d)", record.id));
         holder.tv_request_time.setText(record.requestTime);
         holder.tv_finish_time.setText(record.finishedTime);
 

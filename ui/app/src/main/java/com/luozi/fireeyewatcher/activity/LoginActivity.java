@@ -1,4 +1,4 @@
-package com.luozi.fireeyewatcher;
+package com.luozi.fireeyewatcher.activity;
 
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.luozi.fireeyewatcher.R;
 import com.luozi.fireeyewatcher.fragment.LoginFragment;
 import com.luozi.fireeyewatcher.fragment.RegisterFragment;
 import com.luozi.fireeyewatcher.manager.AppManager;
