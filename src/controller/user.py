@@ -1,6 +1,5 @@
-import json
 from log import logger
-from flask import Blueprint, request, session
+from flask import Blueprint, request, make_response
 from model import User, Token
 from service import UserService
 from repository import UserRepository
@@ -38,7 +37,7 @@ def get_users():
     users = user_service.list_users()
 
     if name == "":
-        return response_success([user.to_json() for user in users], "get all users")
+        return make_response(response_success([user.to_json() for user in users], "get all users"), 200)
     
     res = []
     for user in users:
@@ -46,7 +45,7 @@ def get_users():
             res.append(user.to_json())
             break
 
-    return response_success(res, "get user by name")
+    return make_response(response_success(res, "get user by name"), 200)
     
 
 @user_controller.post("/users")
@@ -65,24 +64,24 @@ def create_users():
     name = body.get("name", "")
     password = body.get("password", "")
     if not valid(name, password):
-        return response_failed(400, "invalid username or password")
+        return make_response(response_failed(400, "invalid username or password"), 400)
     
     users = user_service.list_users()
     for user in users:
         if name == user.name:
-            return response_failed(400, "username already existed")
+            return make_response(response_failed(400, "username already existed"), 400)
     
     password = ctx.hash(password)
     user = User(name=name, password=password)
     user = user_service.create_user(user)
 
     if user == None:
-        return response_failed(500, "create user failed")
+        return make_response(response_failed(500, "create user failed"), 500)
 
-    return response_success(
+    return make_response(response_success(
         user.to_json(), 
         "create user successfully"
-    )
+    ), 200)
 
 @user_controller.put("/users")
 def update_user():
@@ -102,31 +101,31 @@ def update_user():
     payload, _ = validate_token(token)
     if payload["name"] != name:
         logger.error("username not match")
-        return response_failed(400, "username not match")
+        return make_response(response_failed(400, "username not match"), 400)
 
     body = request.get_json()
     new_user = body.get("new_user", "{}")
 
     if not new_user:
         logger.error("empty update user input")
-        return response_failed(400, "empty update user input")
+        return make_response(response_failed(400, "empty update user input"), 400)
     
     password = new_user.get("password", "")
 
     if not valid(name, password):
-        return response_failed(400, "invalid username or password")
+        return make_response(response_failed(400, "empty update user input"), 400)
     
     user = User(name=name)
     user.password = ctx.hash(password)
     user = user_service.update_user(name, user)
 
     if user == None:
-        return response_failed(500, "update user failed")
+        return make_response(response_failed(400, "empty update user input"), 500)
 
-    return response_success(
+    return make_response(response_success(
         user.to_json(),
         "update user successfully"
-    )
+    ), 200)
 
 @user_controller.delete("/users")
 def delete_user():
@@ -142,11 +141,11 @@ def delete_user():
     name = request.args.get("name", "")
     if name == "":
         logger.error("empty username")
-        return response_failed(400, "empty username")
+        return make_response(response_failed(400, "empty username"), 400)
     
     user_service.delete_user(name)
 
-    return response_success(None, "delete user successfully")
+    return make_response(response_success(None, "delete user successfully"), 200)
 
 @user_controller.post("/auth/login")
 def login():
@@ -164,26 +163,26 @@ def login():
     name = body.get("name", "")
     password = body.get("password", "")
     if not valid(name, password):
-        return response_failed(400, "invalid username or password")
+        return make_response(response_failed(400, "invalid username or password"), 400)
     
     user = user_service.get_user(name)
     if user == None:
         logger.error("user not found")
-        return response_failed(400, "user not found")
+        return make_response(response_failed(400, "user not found"), 400)
     
     if not ctx.verify(password, user.password):
         logger.error("wrong password")
-        return response_failed(400, "wrong password")
+        return make_response(response_failed(400, "wrong password"), 400)
     
     token = gen_jwt(user)
 
-    return response_success(
+    return make_response(response_success(
         data=Token(
             uid=user.id, name=user.name, jwt=token,
             desc="login successfully, please set token in headers"
         ).to_json(),
         desc="login successfully, please set token in headers"
-    )
+    ), 200)
 
 @user_controller.post("/auth/register")
 def register():
@@ -191,24 +190,24 @@ def register():
     name = body.get("name", "")
     password = body.get("password", "")
     if not valid(name, password):
-        return response_failed(400, "invalid username or password")
+        return make_response(response_failed(400, "invalid username or password"), 400)
     
     users = user_service.list_users()
     for user in users:
         if name == user.name:
-            return response_failed(400, "username already existed")
+            return make_response(response_failed(400, "username already existed"), 400)
     
     password = ctx.hash(password)
     user = User(name=name, password=password)
     user = user_service.create_user(user)
 
     if user == None:
-        return response_failed(500, "create user failed")
+        return make_response(response_failed(500, "create user failed"), 500)
 
-    return response_success(
+    return make_response(response_success(
         data=user.to_json(),
         desc="register successfully"
-    )
+    ), 200)
 
 @user_controller.post("/auth/logout")
 def logout():
@@ -221,4 +220,4 @@ def logout():
     @Router /api/v1/auth/logout [post]
     """
     # stateless logout
-    return response_success(None, "logout successfully")
+    return make_response(response_success(None, "logout successfully"), 200)

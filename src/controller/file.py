@@ -2,7 +2,7 @@ import os
 import time
 import shutil
 from log import logger
-from flask import Blueprint, request, send_file
+from flask import Blueprint, request, send_file, make_response
 from common import response_success, response_failed
 from model import Record
 from service import RecordService
@@ -56,16 +56,16 @@ def upload_file():
     p = Process(target=process_video, args=(payload["id"],path,))
     p.start()
 
-    return response_success(record.to_json(), "upload video successfully")
+    return make_response(response_success(record.to_json(), "upload video successfully"), 200)
 
 @file_controller.get("/videos/<int:id>")
 def get_video(id):
     record = record_service.get_record(id)
     if record == None:
-        return response_failed(404, "record not found")
+        return make_response(response_failed(400, "record not found"), 400)
     
     video_path = "/var/upload/fireeye/processed" + "/" + "{id}.mp4".format(id=id)
     if not os.path.exists(video_path):
-        return response_failed(404, "video file not found")
+        return make_response(response_failed(400, "video file not found"), 400)
     
-    return send_file(video_path)
+    return make_response(send_file(video_path), 200)
