@@ -14,12 +14,15 @@ import android.widget.TextView;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
+import com.luozi.fireeyewatcher.activity.AboutActivity;
 import com.luozi.fireeyewatcher.activity.LoginActivity;
 import com.luozi.fireeyewatcher.R;
 import com.luozi.fireeyewatcher.activity.UpdateUserActivity;
 import com.luozi.fireeyewatcher.adapter.SettingListAdapter;
 import com.luozi.fireeyewatcher.http.Common;
 import com.luozi.fireeyewatcher.manager.AppManager;
+import com.luozi.fireeyewatcher.model.SettingOption;
+import com.luozi.fireeyewatcher.utils.ToastCustom;
 import com.luozi.fireeyewatcher.view.CornerListView;
 
 import java.util.Arrays;
@@ -48,17 +51,30 @@ public class UserFragment extends Fragment {
         setting_list = view.findViewById(R.id.setting_list);
         tv_logout = view.findViewById(R.id.tv_logout);
 
-        tv_username.setText(Common.loginUser.username);
+        tv_username.setText(String.format("当前账户：%s", Common.loginUser.username));
 
-        SettingListAdapter settingListAdapter = new SettingListAdapter(context, Arrays.asList(options));
+        SettingListAdapter settingListAdapter = new SettingListAdapter(context, SettingOption.getInstance());
         setting_list.setAdapter(settingListAdapter);
         setting_list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Intent intent = new Intent();
                 switch(i) {
                     case 0:
-                        Intent intent = new Intent();
                         intent.setClass(context, UpdateUserActivity.class);
+                        startActivity(intent);
+                        break;
+                    case 1:
+                        // todo: use server statistic api
+                        break;
+                    case 2:
+                        // todo: setting
+                        break;
+                    case 3:
+                        // todo: help
+                        break;
+                    case 4:
+                        intent.setClass(context, AboutActivity.class);
                         startActivity(intent);
                         break;
                 }

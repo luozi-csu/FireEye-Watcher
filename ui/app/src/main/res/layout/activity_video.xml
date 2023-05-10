@@ -4,26 +4,15 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/root_ll"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@color/black" >
 
     <SurfaceView
         android:id="@+id/sv_video"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <ProgressBar
-        android:id="@+id/pb_video"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:visibility="invisible"
-        android:indeterminateTintMode="src_atop"
-        android:indeterminateTint="@color/theme"/>
-
-    <Toolbar
+    <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -31,7 +20,8 @@
         android:background="#80CCCCCC"
         android:minHeight="?attr/actionBarSize"
         android:theme="?attr/actionBarTheme"
-        android:title="视频预览"
-        android:titleTextColor="@color/white" />
+        app:title="视频预览"
+        app:titleTextColor="@color/white"
+        app:navigationIcon="@mipmap/app_back"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

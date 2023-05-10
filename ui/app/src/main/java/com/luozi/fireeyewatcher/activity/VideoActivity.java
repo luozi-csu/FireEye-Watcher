@@ -4,35 +4,34 @@ import android.app.Activity;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.Window;
 import android.widget.MediaController;
-import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import com.luozi.fireeyewatcher.R;
 import com.luozi.fireeyewatcher.http.Common;
 import com.luozi.fireeyewatcher.manager.AppManager;
 import com.luozi.fireeyewatcher.utils.ToastCustom;
 
-import org.apache.hc.client5.http.classic.methods.HttpDelete;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.core5.http.HttpEntity;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
-import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -47,11 +46,12 @@ public class VideoActivity extends AppCompatActivity implements
     private MediaPlayer mediaPlayer;
     private MediaController mediaController;
     private SurfaceView sv_video;
-    private ProgressBar pb_video;
     private int bufferPercentage = 0;
     private String videoUri;
+    private String filePath;
     private ThreadPoolExecutor executor;
     private CloseableHttpClient client;
+    private Toolbar toolbar;
     private static final String LOG_TAG = "VIDEO";
 
     @Override
@@ -60,6 +60,12 @@ public class VideoActivity extends AppCompatActivity implements
         AppManager.getInstance().addActivity(this);
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_video);
+
+        toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(findViewById(R.id.toolbar));
+        toolbar.setNavigationOnClickListener(view -> {
+            AppManager.getInstance().finishActivity();
+        });
 
         mediaPlayer = new MediaPlayer();
         mediaController = new MediaController(this);
@@ -85,13 +91,20 @@ public class VideoActivity extends AppCompatActivity implements
     protected void onResume() {
         super.onResume();
         try {
+            filePath = getTempVideo();
 
+            if (filePath == null || filePath.isEmpty()) {
+                Log.e(LOG_TAG, "视频下载失败");
+                mediaController.setMediaPlayer(this);
+                mediaController.setEnabled(false);
+            } else {
+                Log.e(LOG_TAG, "视频下载完成");
+                mediaPlayer.setDataSource(filePath);
+                mediaPlayer.setOnBufferingUpdateListener(this);
 
-            mediaPlayer.setDataSource(videoUri);
-            mediaPlayer.setOnBufferingUpdateListener(this);
-
-            mediaController.setMediaPlayer(this);
-            mediaController.setEnabled(true);
+                mediaController.setMediaPlayer(this);
+                mediaController.setEnabled(true);
+            }
         } catch (IOException e){
             Log.e(LOG_TAG, String.format("load video(uri=%s) failed", videoUri));
             e.printStackTrace();
@@ -113,6 +126,11 @@ public class VideoActivity extends AppCompatActivity implements
             mediaPlayer.release();
             mediaPlayer = null;
         }
+        File file = new File(filePath);
+        if (file.exists()) {
+            file.delete();
+        }
+        Log.d(LOG_TAG, "on destroy");
     }
 
     @Override
@@ -204,65 +222,58 @@ public class VideoActivity extends AppCompatActivity implements
         return 0;
     }
 
-    private void getTempVideo() {
+    private String getTempVideo() {
+        String tempVideoDir = getExternalFilesDir(Environment.DIRECTORY_MOVIES).getAbsolutePath();
+        String path = tempVideoDir + "/" + videoUri.substring(videoUri.lastIndexOf("/") + 1) + ".mp4";
+        File file = new File(path);
+        if (file.exists()) {
+            file.delete();
+        }
+
         Future future = executor.submit(() -> {
             HttpGet httpGet = new HttpGet(videoUri);
             httpGet.setHeader("Authorization", Common.access_token);
             httpGet.setHeader("Accept", "*/*");
 
-            String res = null;
-            try {
-                res = client.execute(httpGet, response -> {
-                    HttpEntity entity = response.getEntity();
-                    if (entity == null) {
-                        return null;
-                    }
-
-                    InputStream inputStream = entity.getContent();
-                    StringBuilder stringBuilder = new StringBuilder();
-                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-                    String read;
-
-                    while ((read = bufferedReader.readLine()) != null) {
-                        stringBuilder.append(read);
-                    }
-
-                    return stringBuilder.toString();
-                });
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-
-            if (res == null || res.length() == 0) {
-                Log.d(LOG_TAG, "empty response");
-            }
-
-            try {
-                JSONObject jsonResponse = new JSONObject(res);
-
-                int statusCode = jsonResponse.getInt("status_code");
-                String desc = jsonResponse.getString("desc");
-                JSONArray records = jsonResponse.getJSONArray("data");
-
-                if (statusCode >= Common.STATUS_SERVER_ERROR) {
-                    ToastCustom.custom(context, "远程服务器异常");
-                    throw new RuntimeException("remote server error");
-                } else if (statusCode >= Common.STATUS_UNAUTHORIZED) {
-                    ToastCustom.custom(context, "会话已失效，请重新登录");
-                    AppManager.getInstance().finishOtherActivity((Activity) context);
+            boolean success = client.execute(httpGet, response -> {
+                if (response.getCode() >= Common.STATUS_SERVER_ERROR) {
+                    ToastCustom.custom(this, "远程服务器异常");
+                    return false;
+                } else if (response.getCode() >= Common.STATUS_UNAUTHORIZED) {
+                    ToastCustom.custom(this, "会话已失效，请重新登录");
+                    AppManager.getInstance().finishOtherActivity((Activity) this);
                     Intent intent = new Intent();
-                    intent.setClass(context, LoginActivity.class);
+                    intent.setClass(this, LoginActivity.class);
                     startActivity(intent);
-                    AppManager.getInstance().finishActivity((Activity) context);
-                } else if (statusCode >= Common.STATUS_REQUEST_ERROR) {
-                    ToastCustom.custom(context, "请求错误");
-                    throw new RuntimeException("get records request error");
+                    AppManager.getInstance().finishActivity((Activity) this);
+                } else if (response.getCode() >= Common.STATUS_REQUEST_ERROR) {
+                    ToastCustom.custom(this, "请求错误");
+                    return false;
                 }
-            } catch (RuntimeException | JSONException e) {
-                e.printStackTrace();
-            }
 
-            return null;
+                HttpEntity entity = response.getEntity();
+                if (entity == null) {
+                    return false;
+                }
+
+                InputStream inputStream = entity.getContent();
+                Files.copy(inputStream, Paths.get(path));
+                return true;
+            });
+
+            return success;
         });
+
+        boolean success = false;
+        try {
+            success = (boolean) future.get();
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        Log.d(LOG_TAG, "video download completely");
+        return success ? path : "";
     }
 }

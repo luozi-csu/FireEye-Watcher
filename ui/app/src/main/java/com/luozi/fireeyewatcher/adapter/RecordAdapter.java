@@ -68,6 +68,7 @@ public class RecordAdapter extends BaseAdapter {
         switch (record.result) {
             case -1:
                 holder.tv_result.setText("识别进行中...");
+                holder.tv_result.setTextColor(context.getColor(R.color.gray));
                 break;
             case 0:
                 holder.tv_result.setText("过低");
@@ -75,6 +76,7 @@ public class RecordAdapter extends BaseAdapter {
                 break;
             case 1:
                 holder.tv_result.setText("正常");
+                holder.tv_result.setTextColor(context.getColor(R.color.gray));
                 break;
             case 2:
                 holder.tv_result.setText("过热");

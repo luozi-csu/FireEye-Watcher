@@ -117,16 +117,22 @@ public class RecordFragment extends Fragment {
 
     private void initRecordListView(ListView lv_record) {
         registerForContextMenu(lv_record);
-        lv_record.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Record record = recordList.get(position);
-                Intent intent = new Intent(context, VideoActivity.class);
-                Bundle bundle = new Bundle();
-                bundle.putInt("record_id", record.id);
-                intent.putExtras(bundle);
-                startActivity(intent);
-            }
+        lv_record.setOnItemClickListener((parent, view, position, id) -> {
+            androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(context);
+            builder.setMessage("确定预览视频？这可能会消耗一段时间用于下载视频，请耐心等待。")
+                    .setPositiveButton("确定", (dialogInterface, i) -> {
+                        ToastCustom.custom(context, "准备进入视频预览");
+                        Record record = recordList.get(position);
+                        Intent intent = new Intent(context, VideoActivity.class);
+                        Bundle bundle = new Bundle();
+                        bundle.putInt("record_id", record.id);
+                        intent.putExtras(bundle);
+                        startActivity(intent);
+                    })
+                    .setNegativeButton("取消", (dialogInterface, i) -> {
+                        // do nothing
+                    });
+            builder.create().show();
         });
     }
 
