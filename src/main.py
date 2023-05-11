@@ -2,7 +2,7 @@ import os
 import yaml
 from flask import Flask
 from middleware import Middleware
-from controller import user_controller, file_controller, record_controller
+from controller import user_controller, file_controller, record_controller, statistics_controller
 
 config = yaml.load(open("config.yaml"), Loader=yaml.CLoader)
 
@@ -12,6 +12,7 @@ app.wsgi_app = Middleware(app.wsgi_app)
 app.register_blueprint(user_controller)
 app.register_blueprint(file_controller)
 app.register_blueprint(record_controller)
+app.register_blueprint(statistics_controller)
 
 if __name__ == "__main__":
     if os.name == "posix":
