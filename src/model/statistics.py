@@ -35,7 +35,7 @@ class Statistics:
         self.normal_rate : float
         self.underheat_rate : float
         self.abnormal_rate : float
-        if self.total_num > 0:
+        if self.processed_num > 0:
             self.overheat_rate = float(overheat_num) / float(self.processed_num)
             self.normal_rate = float(normal_num) / float(self.processed_num)
             self.underheat_rate = float(underheat_num) / float(self.processed_num)
