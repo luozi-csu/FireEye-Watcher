@@ -55,5 +55,5 @@ class Statistics:
             "normal_rate": self.normal_rate,
             "underheat_rate": self.underheat_rate,
             "abnormal_rate": self.abnormal_rate,
-            "daily_freqs:": [daily_freq.to_json() for daily_freq in self.daily_freqs]
+            "daily_freqs": [daily_freq.to_json() for daily_freq in self.daily_freqs]
         }
