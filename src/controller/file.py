@@ -10,7 +10,7 @@ from repository import RecordRepository
 from database import db
 from algorithm.yolov5 import detect, classify
 from multiprocessing import Process
-from util import *
+from util import validate_token
 from pathlib import Path
 
 record_repository = RecordRepository(conn=db)
