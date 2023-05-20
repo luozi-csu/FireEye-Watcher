@@ -56,10 +56,16 @@ def get_statistics():
             daily_dict.setdefault(date, 1)
 
     ordered_daily_dict = OrderedDict(sorted(daily_dict.items(), key=lambda x: x[0]))
-    daily_freqs : list[DailyFreq] = []
+    ordered_freqs : list[DailyFreq] = []
     for key, value in ordered_daily_dict.items():
         daily_freq = DailyFreq(key, value)
-        daily_freqs.append(daily_freq)
+        ordered_freqs.append(daily_freq)
+
+    daily_freqs : list[DailyFreq] = [ordered_freqs[0]]
+    for i in range(1, len(ordered_freqs)):
+        for date in range(daily_freqs[-1].date+86400, ordered_freqs[i].date, 86400):
+            daily_freqs.append(DailyFreq(date, 0))
+        daily_freqs.append(ordered_freqs[i])
 
     statistics = Statistics(uid, overheat_num, normal_num, underheat_num, processing_num,
                             daily_freqs)
