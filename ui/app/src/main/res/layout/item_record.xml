@@ -10,10 +10,10 @@
         android:layout_height="wrap_content"
         app:cardCornerRadius="8dp"
         app:cardElevation="4dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
         >
 
         <LinearLayout
@@ -25,11 +25,11 @@
                 android:id="@+id/tv_record_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:drawableLeft="@mipmap/history_icon"
-                android:drawableTint="@color/theme"
-                android:drawablePadding="5dp"
-                android:drawableTintMode="src_atop"
                 android:layout_margin="8dp"
+                android:drawableLeft="@mipmap/history_icon"
+                android:drawablePadding="5dp"
+                android:drawableTint="@color/theme"
+                android:drawableTintMode="src_atop"
                 android:textColor="@color/theme"
                 android:textSize="16dp"
                 android:textStyle="bold"
@@ -48,7 +48,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentLeft="true"
                     android:text="请求时间"
-                    android:textSize="10dp"/>
+                    android:textSize="10dp" />
 
                 <TextView
                     android:id="@+id/tv_finish_time_label"
@@ -56,7 +56,7 @@
                     android:layout_height="wrap_content"
                     android:layout_below="@id/tv_request_time_label"
                     android:text="完成时间"
-                    android:textSize="10dp"/>
+                    android:textSize="10dp" />
 
                 <TextView
                     android:id="@+id/tv_result_label"
@@ -64,7 +64,7 @@
                     android:layout_height="wrap_content"
                     android:layout_below="@id/tv_finish_time_label"
                     android:text="识别结果"
-                    android:textSize="10dp"/>
+                    android:textSize="10dp" />
 
                 <TextView
                     android:id="@+id/tv_request_time"
@@ -72,25 +72,25 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
                     android:text="2006-01-02 00:00:00"
-                    android:textSize="10dp"/>
+                    android:textSize="10dp" />
 
                 <TextView
                     android:id="@+id/tv_finish_time"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignRight="@id/tv_request_time"
                     android:layout_below="@id/tv_request_time"
+                    android:layout_alignRight="@id/tv_request_time"
                     android:text="2006-01-02 00:00:00"
-                    android:textSize="10dp"/>
+                    android:textSize="10dp" />
 
                 <TextView
                     android:id="@+id/tv_result"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignRight="@id/tv_finish_time"
                     android:layout_below="@id/tv_finish_time"
+                    android:layout_alignRight="@id/tv_finish_time"
                     android:text="正常"
-                    android:textSize="10dp"/>
+                    android:textSize="10dp" />
 
             </RelativeLayout>
 

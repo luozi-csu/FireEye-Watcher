@@ -200,7 +200,7 @@ public class CameraFragment extends Fragment {
                 CameraSelector cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA;
 
                 Recorder recorder = new Recorder.Builder()
-                        .setQualitySelector(QualitySelector.from(Quality.HIGHEST))
+                        .setQualitySelector(QualitySelector.from(Quality.HD))
                         .build();
                 videoCapture = VideoCapture.withOutput(recorder);
 

@@ -17,16 +17,13 @@ import androidx.fragment.app.Fragment;
 import com.luozi.fireeyewatcher.activity.AboutActivity;
 import com.luozi.fireeyewatcher.activity.LoginActivity;
 import com.luozi.fireeyewatcher.R;
+import com.luozi.fireeyewatcher.activity.StatisticsActivity;
 import com.luozi.fireeyewatcher.activity.UpdateUserActivity;
 import com.luozi.fireeyewatcher.adapter.SettingListAdapter;
 import com.luozi.fireeyewatcher.http.Common;
 import com.luozi.fireeyewatcher.manager.AppManager;
 import com.luozi.fireeyewatcher.model.SettingOption;
-import com.luozi.fireeyewatcher.utils.ToastCustom;
 import com.luozi.fireeyewatcher.view.CornerListView;
-
-import java.util.Arrays;
-import java.util.List;
 
 public class UserFragment extends Fragment {
     private View view;
@@ -34,7 +31,6 @@ public class UserFragment extends Fragment {
     private TextView tv_username;
     private CornerListView setting_list;
     private TextView tv_logout;
-    private static final String[] options = new String[]{"修改密码", "统计信息", "设置", "关于"};
     private static final String LOG_TAG = "USER_FRAGMENT";
 
     @Override
@@ -65,7 +61,8 @@ public class UserFragment extends Fragment {
                         startActivity(intent);
                         break;
                     case 1:
-                        // todo: use server statistic api
+                        intent.setClass(context, StatisticsActivity.class);
+                        startActivity(intent);
                         break;
                     case 2:
                         // todo: setting
