@@ -70,6 +70,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -125,19 +126,16 @@ public class StatisticsActivity extends AppCompatActivity implements OnChartValu
 
         @Override
         public void onClick(View view) {
-            String cur = tv.getText().toString();
-            int curYear = Integer.parseInt(cur.substring(0, 4));
-            int curMonth = Integer.parseInt(cur.substring(5, 7));
-            int curDay = Integer.parseInt(cur.substring(8, 10));
+            Calendar calendar = Calendar.getInstance(Locale.CHINA);
             new DatePickerDialog(context, 0, (datePicker, year, monthOfYear, dayOfMonth) -> {
                 try {
-                    String text = DateUtil.convertToDate(year, monthOfYear, dayOfMonth);
+                    String text = DateUtil.convertToDate(year, monthOfYear + 1, dayOfMonth);
                     tv.setText(text);
                 } catch (ParseException e) {
                     Log.e(LOG_TAG, "convert date failed");
                     throw new RuntimeException(e);
                 }
-            }, curYear, curMonth, curDay)
+            }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH))
                     .show();
         }
     }
