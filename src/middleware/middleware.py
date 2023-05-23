@@ -22,11 +22,9 @@ class Middleware(object):
         if not (msg is None):
             response = make_response(response_failed(401, msg), 401)
             app_iter = response(environ, start_response)
-            self.ctx.pop()
             return app_iter
         
         response = self.old_wsgi_app(environ, start_response)
-        self.ctx.pop()
         return response
     
     def request_logger(self, environ: dict):
